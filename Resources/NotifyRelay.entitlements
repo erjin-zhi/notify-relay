@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 沙盒：App 默认只能访问自己的容器。 -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- 发送 WebHook。 -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<!-- 用户在“选择文件夹”窗口里选中的文件夹可以读写（SQLite 读 WAL 库要用到 -shm 文件），并能记住下次继续用。 -->
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<key>com.apple.security.files.bookmarks.app-scope</key>
+	<true/>
+	<!-- 沙盒例外：通知数据库所在文件夹。系统隐私保护（完全磁盘访问权限）仍然会单独把关。 -->
+	<key>com.apple.security.temporary-exception.files.home-relative-path.read-write</key>
+	<array>
+		<string>/Library/Group Containers/group.com.apple.usernoted/</string>
+	</array>
+	<!-- 沙盒例外：只读旧版配置，首次启动时迁移进沙盒容器。 -->
+	<key>com.apple.security.temporary-exception.files.home-relative-path.read-only</key>
+	<array>
+		<string>/Library/Application Support/notify-relay/</string>
+	</array>
+</dict>
+</plist>

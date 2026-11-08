@@ -1,0 +1,14 @@
+# SwiftPM and packaged apps
+/.build/
+/build/
+/.swiftpm/
+
+# macOS and Xcode user settings
+.DS_Store
+xcuserdata/
+*.xcuserstate
+
+# Local environment settings
+.env
+.env.*
+!.env.example
