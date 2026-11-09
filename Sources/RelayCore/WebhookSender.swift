@@ -5,6 +5,12 @@ public struct DeliveryResult: Sendable {
     public let webhookName: String
     public let statusCode: Int?
     public let error: String?
+    /// 实际发出去的请求，用于在转发记录里查看。模板出错、地址无效时为 nil。
+    public var request: SentRequest?
+    /// 平台返回的原文（过长时截断）。
+    public var responseBody: String?
+    /// 从发出请求到收到响应的耗时。
+    public var duration: TimeInterval?
 
     public var ok: Bool { error == nil && (statusCode.map { (200..<300).contains($0) } ?? false) }
 
@@ -15,11 +21,37 @@ public struct DeliveryResult: Sendable {
     }
 }
 
+/// 发给 WebHook 的请求内容。
+public struct SentRequest: Sendable {
+    public let url: String
+    public let method: String
+    public let contentType: String
+    public let body: String
+
+    /// 等价的 curl 命令，复制到终端就能重发同样的请求，方便调试。
+    public var curlCommand: String {
+        """
+        curl -X \(method) \(Self.shellQuote(url)) \\
+          -H \(Self.shellQuote("Content-Type: \(contentType)")) \\
+          --data-raw \(Self.shellQuote(body))
+        """
+    }
+
+    /// 用单引号包起来；内容里的单引号写成 `'\''`。
+    static func shellQuote(_ s: String) -> String {
+        "'" + s.replacingOccurrences(of: "'", with: "'\\''") + "'"
+    }
+}
+
 /// 按 WebHook 的模板生成消息并 POST 出去。
 public enum WebhookSender {
     public static func send(_ record: NotificationRecord, to webhook: Webhook, session: URLSession = .shared) async -> DeliveryResult {
-        func result(_ status: Int?, _ error: String?) -> DeliveryResult {
-            DeliveryResult(webhookID: webhook.id, webhookName: webhook.name, statusCode: status, error: error)
+        var sent: SentRequest?
+        func result(_ status: Int?, _ error: String?, response: Data? = nil, duration: TimeInterval? = nil) -> DeliveryResult {
+            DeliveryResult(
+                webhookID: webhook.id, webhookName: webhook.name, statusCode: status, error: error,
+                request: sent, responseBody: response.map(responseText), duration: duration
+            )
         }
         guard let url = URL(string: webhook.url.trimmingCharacters(in: .whitespaces)),
               let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https"
@@ -36,13 +68,25 @@ public enum WebhookSender {
         request.httpMethod = "POST"
         request.setValue(message.contentType, forHTTPHeaderField: "Content-Type")
         request.httpBody = message.body
+        sent = SentRequest(
+            url: url.absoluteString, method: "POST", contentType: message.contentType,
+            body: String(decoding: message.body, as: UTF8.self)
+        )
+        let start = Date()
         do {
             let (data, response) = try await session.data(for: request)
             let status = (response as? HTTPURLResponse)?.statusCode
-            return result(status, platformError(in: data))
+            return result(status, platformError(in: data), response: data, duration: Date().timeIntervalSince(start))
         } catch {
-            return result(nil, error.localizedDescription)
+            return result(nil, error.localizedDescription, duration: Date().timeIntervalSince(start))
         }
+    }
+
+    /// 返回内容转成文字，最多保留 8 KB。
+    static func responseText(_ data: Data) -> String {
+        let limit = 8 * 1024
+        let text = String(decoding: data.prefix(limit), as: UTF8.self)
+        return data.count > limit ? text + "\n…（共 \(data.count) 字节，已截断）" : text
     }
 
     /// 企业微信、钉钉、飞书出错时 HTTP 状态仍是 200，错误放在返回的 JSON 里。

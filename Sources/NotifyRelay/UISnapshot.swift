@@ -1,6 +1,7 @@
 import AppKit
 import QuartzCore
 import ScreenCaptureKit
+import RelayCore
 
 /// 开发用：设置环境变量 `NOTIFY_RELAY_SNAPSHOT=<目录>` 启动时，自动打开设置窗口，
 /// 依次截图“初始 → 收起侧边栏过程 → 展开侧边栏过程”，然后退出。只截本 App 自己的窗口。
@@ -9,6 +10,15 @@ enum UISnapshot {
     static var directory: URL? {
         guard let p = ProcessInfo.processInfo.environment["NOTIFY_RELAY_SNAPSHOT"], !p.isEmpty else { return nil }
         return URL(fileURLWithPath: p)
+    }
+
+    /// 开发用：`NOTIFY_RELAY_SNAPSHOT_DEMO_WEBHOOK=<本地地址>` 时，往这个地址发几条示例消息，
+    /// 让“转发记录”里有内容可截图。不改动配置。
+    static func sendDemoDeliveries(_ engine: RelayEngine) {
+        guard directory != nil, let url = ProcessInfo.processInfo.environment["NOTIFY_RELAY_SNAPSHOT_DEMO_WEBHOOK"] else { return }
+        let hook = Webhook(name: "本地测试", url: url, template: BuiltinTemplates.wecomText.body)
+        engine.deliver(WebhookSender.sampleRecord(), to: hook)
+        engine.deliver(WebhookSender.sampleRecord(), to: Webhook(name: "无效地址", url: "notaurl"))
     }
 
     static func runIfRequested() {
@@ -49,6 +59,12 @@ enum UISnapshot {
                     NotificationCenter.default.post(name: .selectSettingsPage, object: page)
                     try? await Task.sleep(for: .seconds(1.2))
                     await capture(window, dir, "page-\(page)")
+                }
+                if ProcessInfo.processInfo.environment["NOTIFY_RELAY_SNAPSHOT_DETAIL"] == "1" {
+                    NotificationCenter.default.post(name: .showFirstDeliveryDetail, object: nil)
+                    try? await Task.sleep(for: .seconds(1.2))
+                    if let sheet = window.attachedSheet { await capture(sheet, dir, "delivery-detail"); window.endSheet(sheet) }
+                    else { log(dir, "没有弹出详情") }
                 }
                 NSApp.terminate(nil); return
             }
@@ -162,4 +178,6 @@ enum UISnapshot {
 
 extension Notification.Name {
     static let selectSettingsPage = Notification.Name("notify-relay.selectSettingsPage")
+    /// 开发截图用：打开第一条转发记录的详情。
+    static let showFirstDeliveryDetail = Notification.Name("notify-relay.showFirstDeliveryDetail")
 }

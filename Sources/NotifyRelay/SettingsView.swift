@@ -243,11 +243,13 @@ struct AppIcon: View {
 struct RecentView: View {
     @EnvironmentObject private var engine: RelayEngine
     @EnvironmentObject private var nav: SettingsNavigation
+    @State private var selectedLog: DeliveryLogEntry.ID?
+    @State private var detail: DeliveryLogEntry?
 
     var body: some View {
         VSplitView {
             Table(engine.recent) {
-                TableColumn("时间") { r in Text(r.date.map(timeText) ?? "") }
+                TableColumn("时间") { r in TimeCell(date: r.date) }
                     .width(70)
                 TableColumn("App") { r in Text(r.appName) }
                     .width(min: 80, ideal: 120)
@@ -281,29 +283,67 @@ struct RecentView: View {
             }
             .frame(minHeight: 200)
 
-            List {
-                Section("转发记录") {
-                    if engine.log.isEmpty { Text("还没有转发记录").foregroundStyle(.secondary) }
-                    ForEach(engine.log) { e in
-                        HStack {
-                            Text(timeText(e.time)).monospacedDigit().foregroundStyle(.secondary)
-                            Text(e.appName)
-                            Text(e.title).lineLimit(1).foregroundStyle(.secondary)
-                            Spacer()
-                            Text("→ \(e.result.webhookName)")
-                            Text(e.result.summary).foregroundStyle(e.result.ok ? .green : .red)
-                        }
-                        .font(.callout)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("转发记录").font(.headline)
+                    Spacer()
+                    Text("双击一条记录查看发送内容").font(.caption).foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                Table(engine.log, selection: $selectedLog) {
+                    TableColumn("时间") { e in TimeCell(date: e.time) }
+                        .width(70)
+                    TableColumn("App") { e in Text(e.appName) }
+                        .width(min: 70, ideal: 100)
+                    TableColumn("内容") { e in Text(e.title).lineLimit(1).foregroundStyle(.secondary) }
+                    TableColumn("转发到") { e in Text(e.result.webhookName).lineLimit(1) }
+                        .width(min: 70, ideal: 100)
+                    TableColumn("结果") { e in
+                        Text(e.result.summary).lineLimit(1).foregroundStyle(e.result.ok ? .green : .red)
+                            .help(e.result.summary)
                     }
+                    .width(min: 90, ideal: 130)
+                    TableColumn("") { e in
+                        Button { detail = e } label: { Image(systemName: "info.circle") }
+                            .buttonStyle(.borderless)
+                            .help("查看发送内容")
+                    }
+                    .width(24)
+                }
+                .contextMenu(forSelectionType: DeliveryLogEntry.ID.self) { ids in
+                    if let e = entry(ids) { Button("查看发送内容") { detail = e } }
+                } primaryAction: { ids in
+                    detail = entry(ids)
+                }
+                .overlay {
+                    if engine.log.isEmpty { Text("还没有转发记录").foregroundStyle(.secondary) }
                 }
             }
-            .frame(minHeight: 120)
+            .frame(minHeight: 160)
+        }
+        .sheet(item: $detail) { DeliveryDetailView(entry: $0) }
+        .onReceive(NotificationCenter.default.publisher(for: .showFirstDeliveryDetail)) { _ in
+            detail = engine.log.first { $0.result.request != nil } ?? engine.log.first
         }
         .navigationTitle("最近通知")
     }
 
-    private func timeText(_ d: Date) -> String {
-        d.formatted(date: .omitted, time: .standard)
+    private func entry(_ ids: Set<DeliveryLogEntry.ID>) -> DeliveryLogEntry? {
+        guard let id = ids.first else { return nil }
+        return engine.log.first { $0.id == id }
+    }
+}
+
+/// 时间列：数字等宽并靠右，“9:55:04”和“10:17:39”的冒号能对齐。
+struct TimeCell: View {
+    let date: Date?
+
+    var body: some View {
+        Text(date.map { $0.formatted(date: .omitted, time: .standard) } ?? "")
+            .monospacedDigit()
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .trailing)
     }
 }
 

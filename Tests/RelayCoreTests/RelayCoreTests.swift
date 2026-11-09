@@ -222,3 +222,59 @@ final class RelayCoreTests: XCTestCase {
         if wal { sqlite3_exec(db, "PRAGMA wal_checkpoint(TRUNCATE)", nil, nil, nil) }
     }
 }
+
+/// 拦截请求、返回固定内容，用来测试 WebhookSender 记录下来的发送内容。
+final class StubProtocol: URLProtocol {
+    nonisolated(unsafe) static var responseBody = Data()
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Self.responseBody)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+    override func stopLoading() {}
+}
+
+final class DeliveryCaptureTests: XCTestCase {
+    func testSendRecordsRequestAndResponse() async {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [StubProtocol.self]
+        let session = URLSession(configuration: config)
+        StubProtocol.responseBody = Data(#"{"errcode":0,"errmsg":"ok"}"#.utf8)
+
+        let hook = Webhook(name: "测试", url: "https://example.com/hook?key=abc", template: BuiltinTemplates.wecomText.body)
+        let result = await WebhookSender.send(WebhookSender.sampleRecord(), to: hook, session: session)
+
+        XCTAssertTrue(result.ok)
+        XCTAssertEqual(result.request?.url, "https://example.com/hook?key=abc")
+        XCTAssertEqual(result.request?.method, "POST")
+        XCTAssertTrue(result.request?.contentType.hasPrefix("application/json") ?? false)
+        XCTAssertTrue(result.request?.body.contains("这是一条来自 notify-relay 的测试消息") ?? false)
+        XCTAssertEqual(result.responseBody, #"{"errcode":0,"errmsg":"ok"}"#)
+        XCTAssertNotNil(result.duration)
+    }
+
+    func testInvalidURLHasNoRequest() async {
+        let result = await WebhookSender.send(WebhookSender.sampleRecord(), to: Webhook(name: "x", url: "notaurl"))
+        XCTAssertFalse(result.ok)
+        XCTAssertNil(result.request)
+    }
+
+    func testCurlCommandQuotesSingleQuotes() {
+        let req = SentRequest(url: "https://example.com/hook?key=a&b=1", method: "POST",
+                              contentType: "application/json; charset=utf-8", body: #"{"text":"it's ok"}"#)
+        XCTAssertEqual(req.curlCommand, """
+            curl -X POST 'https://example.com/hook?key=a&b=1' \\
+              -H 'Content-Type: application/json; charset=utf-8' \\
+              --data-raw '{"text":"it'\\''s ok"}'
+            """)
+    }
+
+    func testLongResponseIsTruncated() {
+        let text = WebhookSender.responseText(Data(repeating: 65, count: 20_000))
+        XCTAssertTrue(text.contains("已截断"))
+        XCTAssertLessThan(text.count, 9_000)
+    }
+}

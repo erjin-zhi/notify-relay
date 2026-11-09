@@ -97,6 +97,8 @@ NOTIFY_RELAY_DEBUG=1 ./build/notify-relay.app/Contents/MacOS/NotifyRelay
 | `NOTIFY_RELAY_DEBUG=1` | 在标准错误输出中记录读取与发送调试信息 |
 | `NOTIFY_RELAY_SNAPSHOT` | 指定截图 / 性能日志输出目录；完成后自动退出 |
 | `NOTIFY_RELAY_SNAPSHOT_PAGES` | 指定截图页面，逗号分隔，如 `access,rules` |
+| `NOTIFY_RELAY_SNAPSHOT_DEMO_WEBHOOK` | 启动时往这个地址发两条示例消息（不改配置），让“转发记录”有内容可截图 |
+| `NOTIFY_RELAY_SNAPSHOT_DETAIL=1` | 截完页面后再打开第一条转发记录的详情并截图 |
 | `NOTIFY_RELAY_PERF_PAGES` | 指定需要测量侧边栏切换耗时的页面，逗号分隔 |
 | `NOTIFY_RELAY_FEED_URL` | 用指定的 appcast 地址代替正式更新源，用于本地测试更新流程 |
 

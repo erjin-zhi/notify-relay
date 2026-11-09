@@ -46,6 +46,7 @@ struct NotifyRelayApp: App {
         let isFirstRun = !FileManager.default.fileExists(atPath: ConfigStore.fileURL.path)
         let engine = RelayEngine()
         engine.start()
+        UISnapshot.sendDemoDeliveries(engine)
         _engine = StateObject(wrappedValue: engine)
         showSettingsAtLaunch = isFirstRun || engine.access != .ok
     }

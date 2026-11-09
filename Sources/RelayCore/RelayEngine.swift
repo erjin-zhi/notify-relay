@@ -13,6 +13,8 @@ public struct DeliveryLogEntry: Identifiable, Sendable {
     public let appName: String
     public let title: String
     public let result: DeliveryResult
+    /// 被转发的那条通知（只存在内存里，不写入磁盘）。
+    public let record: NotificationRecord
 }
 
 /// 转发引擎：定时检查通知数据库，发现新通知就按规则转发。
@@ -197,7 +199,7 @@ public final class RelayEngine: ObservableObject {
             let result = await WebhookSender.send(record, to: webhook, session: session)
             debugLog("\(record.appName) → \(webhook.name): \(result.summary)")
             if result.ok { forwardedCount += 1 }
-            log.insert(DeliveryLogEntry(time: Date(), appName: record.appName, title: record.title ?? record.body ?? "", result: result), at: 0)
+            log.insert(DeliveryLogEntry(time: Date(), appName: record.appName, title: record.title ?? record.body ?? "", result: result, record: record), at: 0)
             if log.count > 200 { log.removeLast(log.count - 200) }
         }
     }
@@ -208,9 +210,10 @@ public final class RelayEngine: ObservableObject {
     public func sendTest(to webhook: Webhook) {
         let session = self.session
         Task {
-            let result = await WebhookSender.send(WebhookSender.sampleRecord(), to: webhook, session: session)
+            let sample = WebhookSender.sampleRecord()
+            let result = await WebhookSender.send(sample, to: webhook, session: session)
             testResults[webhook.id] = result
-            log.insert(DeliveryLogEntry(time: Date(), appName: "测试消息", title: "测试通知", result: result), at: 0)
+            log.insert(DeliveryLogEntry(time: Date(), appName: "测试消息", title: "测试通知", result: result, record: sample), at: 0)
         }
     }
 
