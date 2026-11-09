@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 import RelayCore
 
 enum SettingsPage: String, CaseIterable, Identifiable {
-    case rules, webhooks, templates, recent, access, updates
+    case rules, webhooks, templates, recent, general, access, updates
     var id: String { rawValue }
 
     var title: String {
@@ -12,6 +12,7 @@ enum SettingsPage: String, CaseIterable, Identifiable {
         case .webhooks: return "WebHook"
         case .templates: return "常用模板"
         case .recent: return "最近通知"
+        case .general: return "通用"
         case .access: return "权限"
         case .updates: return "软件更新"
         }
@@ -23,6 +24,7 @@ enum SettingsPage: String, CaseIterable, Identifiable {
         case .webhooks: return "link"
         case .templates: return "doc.text"
         case .recent: return "clock"
+        case .general: return "gearshape"
         case .access: return "lock.shield"
         case .updates: return "arrow.down.circle"
         }
@@ -63,6 +65,7 @@ struct SettingsView: View {
                 case .webhooks: WebhooksView()
                 case .templates: TemplatesView()
                 case .recent: RecentView()
+                case .general: GeneralSettingsView()
                 case .access: AccessView()
                 case .updates: UpdatesView()
                 }

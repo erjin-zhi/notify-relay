@@ -29,6 +29,10 @@ let package = Package(
             name: "RelayCoreTests",
             dependencies: ["RelayCore"]
         ),
+        .testTarget(
+            name: "NotifyRelayTests",
+            dependencies: ["NotifyRelay"]
+        ),
     ],
     swiftLanguageModes: [.v5]
 )
