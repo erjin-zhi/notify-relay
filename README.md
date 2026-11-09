@@ -22,6 +22,7 @@ notify-relay 是使用 Swift 和 SwiftUI 开发的原生 macOS 菜单栏应用�
 - **通知与发送记录**：查看最近通知和转发结果，从通知直接添加或定位 App 规则。
 - **文件夹授权**：优先通过选择通知文件夹授予访问权限，也提供完全磁盘访问权限引导。
 - **菜单栏常驻**：在菜单栏查看状态、暂停转发或打开设置。
+- **自动更新**：每天检查 GitHub Releases 上的新版本，可在「软件更新」页手动检查或开启自动下载安装（基于 [Sparkle](https://sparkle-project.org)）。
 
 ## 快速开始
 
@@ -193,7 +194,7 @@ App 规则和默认规则都支持多个目标；同一条规则内重复选择�
 
 ## 开发
 
-项目使用 Swift Package Manager，没有第三方包依赖，数据库访问使用系统 SQLite。
+项目使用 Swift Package Manager，唯一的第三方依赖是负责自动更新的 [Sparkle](https://github.com/sparkle-project/Sparkle)，数据库访问使用系统 SQLite。
 
 ```bash
 # 编译
@@ -226,8 +227,35 @@ SIGN_IDENTITY="Apple Development: YOUR NAME (TEAMID)" ./scripts/build-app.sh
 ├── Resources/                    # 图标、Info.plist 和沙盒权限声明
 └── scripts/
     ├── build-app.sh              # 应用打包与签名
-    └── make-icon.swift           # 图标生成
+    ├── make-icon.swift           # 图标生成
+    └── release.sh                # 发布新版本（打包、签名、生成 appcast.xml）
 ```
+
+### 发布新版本
+
+App 通过 Sparkle 读取 `https://github.com/erjin-zhi/notify-relay/releases/latest/download/appcast.xml`，因此每个 GitHub Release 都需要上传 `appcast.xml` 和对应的 zip。`scripts/release.sh` 会完成这些步骤：
+
+1. 把 `Info.plist` 的版本号改成指定版本，构建号自动加一（Sparkle 按构建号判断新旧）。
+2. 构建、签名 App，压缩成 `build/release/notify-relay-<版本>.zip`。
+3. 用钥匙串中的 EdDSA 私钥（账户 `notify-relay`）签名 zip，生成 `build/release/appcast.xml`。
+
+更新说明可以提前写在 `build/release/notes-<版本>.md`，会显示在更新窗口里。
+
+```bash
+# 只生成文件，检查后再手动发布
+./scripts/release.sh 0.2.0
+
+# 生成并直接创建 GitHub Release
+./scripts/release.sh 0.2.0 --publish
+```
+
+私钥只保存在本机钥匙串中，丢失后已安装的用户将无法验证新版本。请导出备份并妥善保管，不要提交到仓库：
+
+```bash
+.build/artifacts/sparkle/Sparkle/bin/generate_keys --account notify-relay -x notify-relay-sparkle-key.txt
+```
+
+临时签名的构建会关闭强化运行时的库校验（`disable-library-validation`），否则系统不允许加载同为临时签名的 Sparkle.framework；使用正式证书签名时不会添加这项权限。
 
 ### 调试选项
 
@@ -245,6 +273,7 @@ NOTIFY_RELAY_DEBUG=1 ./build/notify-relay.app/Contents/MacOS/NotifyRelay
 | `NOTIFY_RELAY_SNAPSHOT` | 指定截图 / 性能日志输出目录；完成后自动退出 |
 | `NOTIFY_RELAY_SNAPSHOT_PAGES` | 指定截图页面，逗号分隔，如 `access,rules` |
 | `NOTIFY_RELAY_PERF_PAGES` | 指定需要测量侧边栏切换耗时的页面，逗号分隔 |
+| `NOTIFY_RELAY_FEED_URL` | 用指定的 appcast 地址代替正式更新源，用于本地测试更新流程 |
 
 截图和性能测量选项需要同时设置 `NOTIFY_RELAY_SNAPSHOT`。页面标识为 `rules`、`webhooks`、`templates`、`recent`、`access`。自定义路径仍受当前进程的沙盒权限约束。
 

@@ -22,8 +22,29 @@ vtool -set-build-version macos "$MIN_VERSION" "$SDK_VERSION" -replace -output "$
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 swift scripts/make-icon.swift "$APP/Contents/Resources/AppIcon.icns"
 
+# 更新功能用的 Sparkle.framework 放进 Contents/Frameworks，并让可执行文件到那里找它。
+mkdir -p "$APP/Contents/Frameworks"
+ditto "$(dirname "$BIN")/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
+install_name_tool -add_rpath @executable_path/../Frameworks "$APP/Contents/MacOS/NotifyRelay"
+
 xattr -cr "$APP"
-codesign --force --options runtime --entitlements Resources/NotifyRelay.entitlements --sign "${SIGN_IDENTITY:--}" "$APP"
+IDENTITY="${SIGN_IDENTITY:--}"
+# 从里到外签名：Sparkle 自带的 XPC 服务和辅助程序 → 框架 → App。
+# 框架要和 App 用同一个身份重新签名，否则开启强化运行时后系统会拒绝加载它。
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework/Versions/B"
+codesign --force --options runtime --sign "$IDENTITY" "$SPARKLE/XPCServices/Installer.xpc"
+codesign --force --options runtime --preserve-metadata=entitlements --sign "$IDENTITY" "$SPARKLE/XPCServices/Downloader.xpc"
+codesign --force --options runtime --sign "$IDENTITY" "$SPARKLE/Autoupdate"
+codesign --force --options runtime --sign "$IDENTITY" "$SPARKLE/Updater.app"
+codesign --force --options runtime --sign "$IDENTITY" "$APP/Contents/Frameworks/Sparkle.framework"
+# 临时签名没有 Team ID，强化运行时的库校验会拒绝加载 Sparkle.framework（即使它也是临时签名）。
+# 只有临时签名时才关闭库校验；用正式证书签名时框架和 App 的 Team ID 一致，不需要。
+ENTITLEMENTS="$STAGE/NotifyRelay.entitlements"
+cp Resources/NotifyRelay.entitlements "$ENTITLEMENTS"
+if [ "$IDENTITY" = "-" ]; then
+    /usr/libexec/PlistBuddy -c 'Add :com.apple.security.cs.disable-library-validation bool true' "$ENTITLEMENTS"
+fi
+codesign --force --options runtime --entitlements "$ENTITLEMENTS" --sign "$IDENTITY" "$APP"
 codesign --verify --strict "$APP"
 
 mkdir -p build

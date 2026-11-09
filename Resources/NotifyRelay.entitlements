@@ -13,6 +13,12 @@
 	<true/>
 	<key>com.apple.security.files.bookmarks.app-scope</key>
 	<true/>
+	<!-- Sparkle 更新：沙盒 App 通过这两个服务启动安装器替换自身。名称是 Bundle ID 加 -spks / -spki。 -->
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>com.oie0um.notify-relay-spks</string>
+		<string>com.oie0um.notify-relay-spki</string>
+	</array>
 	<!-- 沙盒例外：通知数据库所在文件夹。系统隐私保护（完全磁盘访问权限）仍然会单独把关。 -->
 	<key>com.apple.security.temporary-exception.files.home-relative-path.read-write</key>
 	<array>

@@ -6,6 +6,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // 打包成 .app 时由 Info.plist 的 LSUIElement 隐藏 Dock 图标；直接运行二进制时在这里设置。
         NSApp.setActivationPolicy(.accessory)
         UISnapshot.runIfRequested()
+        // 启动 Sparkle，按 Info.plist 里的间隔在后台检查更新。
+        _ = AppUpdater.shared
     }
 
     /// App 已在运行时再次打开（双击、`open`、Spotlight），弹出设置窗口。
@@ -75,9 +77,15 @@ struct NotifyRelayApp: App {
 
 struct MenuContent: View {
     @EnvironmentObject private var engine: RelayEngine
+    @ObservedObject private var updater = AppUpdater.shared
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
+        if let version = updater.pendingVersion {
+            Button("发现新版本 \(version)…") { updater.checkForUpdates() }
+            Divider()
+        }
+
         switch engine.access {
         case .ok where engine.config.forwardingEnabled:
             Text("正在转发通知 · 本次已转发 \(engine.forwardedCount) 条")
@@ -95,6 +103,8 @@ struct MenuContent: View {
 
         Button("设置…") { showSettings() }
             .keyboardShortcut(",")
+        Button("检查更新…") { updater.checkForUpdates() }
+            .disabled(!updater.isAvailable || !updater.canCheckForUpdates)
 
         Divider()
 
