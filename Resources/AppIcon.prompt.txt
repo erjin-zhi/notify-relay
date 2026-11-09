@@ -1,0 +1,40 @@
+捎信 SendWord — App 图标
+生成方式：内置 image_gen；满幅插画与透明圆角分两步完成。
+用途：logo-brand / macOS App icon。
+
+文件
+- AppIcon-artwork.png：image_gen 原始满幅插画，实际返回 1254 × 1254，无 Alpha、无圆角。
+- AppIcon-source.png：Swift 生成的最终 1024 × 1024 RGBA PNG。
+- AppIcon.icns：由 make-icon.swift 生成的全尺寸 macOS 图标。
+
+第 1 步：实际使用的 image_gen 提示词（原文）
+工具参数：transparent_background=false；未传入参考图片。
+
+Square 1024x1024 full-bleed artwork for a macOS app icon (the rounded-square mask will be applied later in code, so fill the entire canvas edge to edge, no rounded corners, no border, no transparency).
+Background: a smooth, calm vertical gradient from bright sky blue (#4DA3FF) at the top to deep royal blue (#2F55D4) at the bottom, with a very soft lighter glow behind the center. No texture, no noise.
+Subject: ONE simple white envelope in flight, tilted about 15 degrees upward to the right, as if being carried toward the viewer's phone. The envelope is a clean geometric shape with a clearly readable V-shaped flap. Behind its left side, two or three short, rounded, tapered white motion streaks (semi-transparent) suggest it is moving up and to the right.
+Style: current macOS / iOS 26 "Liquid Glass" app icon language — the envelope looks like a slightly frosted, softly lit white glass layer with a subtle bright rim along its top edge and a very soft, diffuse shadow beneath it. Restrained, precise, premium, like an Apple system app icon. Not cartoon, not clay, not plastic, not a photorealistic 3D render.
+Composition: the envelope plus motion streaks is centered and occupies about 55% of the canvas width, with generous empty space around it, so it stays readable at 32x32 pixels.
+Do NOT include: text, letters, logos, paper planes, wings, birds, bells, phones, arrows with arrowheads, extra envelopes, sparkles, stars, AI or robot motifs, orange, purple, rounded-square frames, drop shadows outside the subject, mockups, multiple options.
+Critical optical refinement for tiny icons: the final icon has to be recognized at just 16x16 pixels with padding. Use a BOLD, crisp deep-blue V-shaped gap between the white triangular flap and the white envelope body, with a consistent visible thickness approximately 5% of the entire canvas width (roughly 50px on a 1024px canvas). This intentional wide V-shaped negative space is essential, not a fine hairline crease, and must survive thumbnail reduction. The white frosted envelope body and flap are almost flat graphic glass layers with only a restrained subtle top rim; no bloom or fuzzy halo. Make the two short trailing strokes clean near-white at 80% opacity, compact, clearly separated, and about 2.5% canvas width thick. Keep all geometry precise and the small-scale silhouette highly legible. Preserve one intact closed envelope, the blue full-bleed gradient, the gentle upward-right tilt, and all exclusions above.
+
+第 2 步：用 Swift / CoreGraphics 确定性处理
+1. 保存生成结果为 Resources/AppIcon-artwork.png。
+2. 运行 swift scripts/prepare-icon.swift。
+   - 以高质量插值将满幅插画缩放至 824 × 824。
+   - 先在不含 Alpha 的 sRGB 缓冲区合成，确保图标内部完全不透明。
+   - 创建并清空 1024 × 1024 RGBA 画布，插画位于 (100, 100)，四边各留 100 px。
+   - 以 |x/412|^5 + |y/412|^5 = 1 的超椭圆近似 macOS 连续圆角。
+   - 使用 4096 段轮廓和 CoreGraphics 抗锯齿裁切；仅轮廓边界保留正常像素覆盖率 Alpha。
+   - 不添加外部投影，圆角轮廓之外透明；输出 Resources/AppIcon-source.png。
+3. 运行 swift scripts/make-icon.swift。
+   - 输出 Resources/AppIcon.icns。
+   - 包含 16、32、128、256、512 点的 1× / 2× 图层，最大 1024 × 1024。
+
+验收
+- 从最终 ICNS 提取 32 × 32 与 16 × 16 图层，在浅色和深色背景上检查。
+- 检查最终 PNG 的非零 Alpha 边界为 x/y 100...923。
+- 检查透明边距、超椭圆之外无残留像素；完整内部像素 Alpha 均为 255。
+- 检查非零 Alpha 只有一个连通区域，排除游离噪点。
+- 图中仅一封完整信封与两条向右上运动的拖尾。
+- 菜单栏 SF Symbol（bell.badge / bell.slash）保持不变。
