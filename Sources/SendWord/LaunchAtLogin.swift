@@ -42,7 +42,7 @@ final class LaunchAtLogin: ObservableObject {
     init(service: any LaunchAtLoginServicing, bundleURL: URL, environment: [String: String]) {
         self.service = service
         isAvailable = bundleURL.pathExtension.lowercased() == "app"
-            && environment["NOTIFY_RELAY_SNAPSHOT"] == nil
+            && environment["SEND_WORD_SNAPSHOT"] == nil
         status = isAvailable ? service.status : .notFound
     }
 

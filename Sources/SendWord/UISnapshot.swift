@@ -3,19 +3,19 @@ import QuartzCore
 import ScreenCaptureKit
 import RelayCore
 
-/// 开发用：设置环境变量 `NOTIFY_RELAY_SNAPSHOT=<目录>` 启动时，自动打开设置窗口，
+/// 开发用：设置环境变量 `SEND_WORD_SNAPSHOT=<目录>` 启动时，自动打开设置窗口，
 /// 依次截图“初始 → 收起侧边栏过程 → 展开侧边栏过程”，然后退出。只截本 App 自己的窗口。
 @MainActor
 enum UISnapshot {
     static var directory: URL? {
-        guard let p = ProcessInfo.processInfo.environment["NOTIFY_RELAY_SNAPSHOT"], !p.isEmpty else { return nil }
+        guard let p = ProcessInfo.processInfo.environment["SEND_WORD_SNAPSHOT"], !p.isEmpty else { return nil }
         return URL(fileURLWithPath: p)
     }
 
-    /// 开发用：`NOTIFY_RELAY_SNAPSHOT_DEMO_WEBHOOK=<本地地址>` 时，往这个地址发几条示例消息，
+    /// 开发用：`SEND_WORD_SNAPSHOT_DEMO_WEBHOOK=<本地地址>` 时，往这个地址发几条示例消息，
     /// 让“转发记录”里有内容可截图。不改动配置。
     static func sendDemoDeliveries(_ engine: RelayEngine) {
-        guard directory != nil, let url = ProcessInfo.processInfo.environment["NOTIFY_RELAY_SNAPSHOT_DEMO_WEBHOOK"] else { return }
+        guard directory != nil, let url = ProcessInfo.processInfo.environment["SEND_WORD_SNAPSHOT_DEMO_WEBHOOK"] else { return }
         let hook = Webhook(name: "本地测试", url: url, template: BuiltinTemplates.wecomText.body)
         engine.deliver(WebhookSender.sampleRecord(), to: hook)
         engine.deliver(WebhookSender.sampleRecord(), to: Webhook(name: "无效地址", url: "notaurl"))
@@ -32,7 +32,7 @@ enum UISnapshot {
                 NSApp.terminate(nil); return
             }
             window.makeKeyAndOrderFront(nil)
-            if let loops = ProcessInfo.processInfo.environment["NOTIFY_RELAY_PERF_LOOP"], let n = Int(loops) {
+            if let loops = ProcessInfo.processInfo.environment["SEND_WORD_PERF_LOOP"], let n = Int(loops) {
                 // 采样用：在当前页反复收起/展开。
                 log(dir, "开始循环 \(ProcessInfo.processInfo.processIdentifier)")
                 for _ in 0..<n {
@@ -41,7 +41,7 @@ enum UISnapshot {
                 }
                 NSApp.terminate(nil); return
             }
-            if let pages = ProcessInfo.processInfo.environment["NOTIFY_RELAY_PERF_PAGES"] {
+            if let pages = ProcessInfo.processInfo.environment["SEND_WORD_PERF_PAGES"] {
                 // 测量模式：每页收起、展开侧边栏各一次，记录主线程最长卡顿。
                 for page in pages.split(separator: ",").map(String.init) {
                     NotificationCenter.default.post(name: .selectSettingsPage, object: page)
@@ -53,14 +53,14 @@ enum UISnapshot {
                 }
                 NSApp.terminate(nil); return
             }
-            if let pages = ProcessInfo.processInfo.environment["NOTIFY_RELAY_SNAPSHOT_PAGES"] {
+            if let pages = ProcessInfo.processInfo.environment["SEND_WORD_SNAPSHOT_PAGES"] {
                 // 只给这几页各截一张图。
                 for page in pages.split(separator: ",").map(String.init) {
                     NotificationCenter.default.post(name: .selectSettingsPage, object: page)
                     try? await Task.sleep(for: .seconds(1.2))
                     await capture(window, dir, "page-\(page)")
                 }
-                if ProcessInfo.processInfo.environment["NOTIFY_RELAY_SNAPSHOT_DETAIL"] == "1" {
+                if ProcessInfo.processInfo.environment["SEND_WORD_SNAPSHOT_DETAIL"] == "1" {
                     NotificationCenter.default.post(name: .showFirstDeliveryDetail, object: nil)
                     try? await Task.sleep(for: .seconds(1.2))
                     if let sheet = window.attachedSheet { await capture(sheet, dir, "delivery-detail"); window.endSheet(sheet) }
@@ -68,7 +68,7 @@ enum UISnapshot {
                 }
                 NSApp.terminate(nil); return
             }
-            if let page = ProcessInfo.processInfo.environment["NOTIFY_RELAY_SNAPSHOT_PAGE"] {
+            if let page = ProcessInfo.processInfo.environment["SEND_WORD_SNAPSHOT_PAGE"] {
                 NotificationCenter.default.post(name: .selectSettingsPage, object: page)
                 try? await Task.sleep(for: .seconds(1))
             }
@@ -177,7 +177,7 @@ enum UISnapshot {
 }
 
 extension Notification.Name {
-    static let selectSettingsPage = Notification.Name("notify-relay.selectSettingsPage")
+    static let selectSettingsPage = Notification.Name("send-word.selectSettingsPage")
     /// 开发截图用：打开第一条转发记录的详情。
-    static let showFirstDeliveryDetail = Notification.Name("notify-relay.showFirstDeliveryDetail")
+    static let showFirstDeliveryDetail = Notification.Name("send-word.showFirstDeliveryDetail")
 }

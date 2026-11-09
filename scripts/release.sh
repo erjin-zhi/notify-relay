@@ -5,17 +5,17 @@
 #   scripts/release.sh 0.2.0 --publish       # 同时创建 GitHub Release 并上传
 #
 # 更新说明写在 build/release/notes-<版本>.md（Markdown），没有就用“修复问题，改进体验”。
-# App 每天读取 https://github.com/erjin-zhi/notify-relay/releases/latest/download/appcast.xml，
+# App 每天读取 https://github.com/erjin-zhi/send-word/releases/latest/download/appcast.xml，
 # 所以每个 Release 都要带上 appcast.xml 和对应的 zip。
 #
-# 签名私钥在本机钥匙串里（账户 notify-relay，由 Sparkle 的 generate_keys 生成）。
+# 签名私钥沿用本机钥匙串中的历史账户 notify-relay，确保旧版本能验证更新。
 # 换电脑前先导出备份：.build/artifacts/sparkle/Sparkle/bin/generate_keys --account notify-relay -x 私钥文件
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 VERSION="${1:?用法：scripts/release.sh <版本号，如 0.2.0> [--publish]}"
 PUBLISH="${2:-}"
-REPO="erjin-zhi/notify-relay"
+REPO="erjin-zhi/send-word"
 TAG="v$VERSION"
 PLIST=Resources/Info.plist
 PB=/usr/libexec/PlistBuddy
@@ -34,11 +34,11 @@ swift package resolve >/dev/null
 
 OUT=build/release
 mkdir -p "$OUT"
-ZIP_NAME="notify-relay-$VERSION.zip"
+ZIP_NAME="send-word-$VERSION.zip"
 ZIP="$OUT/$ZIP_NAME"
 rm -f "$ZIP"
 # 不打包扩展属性：同步服务加的 Finder 信息会让解压后的 App 签名校验失败。
-ditto -c -k --norsrc --noextattr --keepParent build/notify-relay.app "$ZIP"
+ditto -c -k --norsrc --noextattr --keepParent build/SendWord.app "$ZIP"
 
 SIGNATURE="$("$SPARKLE_BIN/sign_update" --account notify-relay "$ZIP")"
 
@@ -49,7 +49,7 @@ cat > "$OUT/appcast.xml" <<XML
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
   <channel>
-    <title>notify-relay</title>
+    <title>捎信 SendWord</title>
     <link>https://github.com/$REPO</link>
     <item>
       <title>$VERSION</title>
@@ -71,7 +71,7 @@ echo "已生成 $ZIP 和 $OUT/appcast.xml（版本 $VERSION，构建号 $BUILD�
 
 if [ "$PUBLISH" = "--publish" ]; then
     gh release create "$TAG" "$ZIP" "$OUT/appcast.xml" \
-        --repo "$REPO" --title "notify-relay $VERSION" --notes-file "$NOTES_FILE"
+        --repo "$REPO" --title "捎信 SendWord $VERSION" --notes-file "$NOTES_FILE"
 else
-    echo "检查无误后发布：gh release create $TAG $ZIP $OUT/appcast.xml --repo $REPO --title \"notify-relay $VERSION\" --notes-file $NOTES_FILE"
+    echo "检查无误后发布：gh release create $TAG $ZIP $OUT/appcast.xml --repo $REPO --title \"捎信 SendWord $VERSION\" --notes-file $NOTES_FILE"
 fi

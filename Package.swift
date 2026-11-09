@@ -2,10 +2,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "NotifyRelay",
+    name: "SendWord",
     platforms: [.macOS(.v15)],
     products: [
-        .executable(name: "NotifyRelay", targets: ["NotifyRelay"]),
+        .executable(name: "SendWord", targets: ["SendWord"]),
     ],
     dependencies: [
         // 检查和安装更新。
@@ -19,7 +19,7 @@ let package = Package(
         ),
         // 菜单栏 App 和设置窗口。
         .executableTarget(
-            name: "NotifyRelay",
+            name: "SendWord",
             dependencies: [
                 "RelayCore",
                 .product(name: "Sparkle", package: "Sparkle"),
@@ -30,8 +30,8 @@ let package = Package(
             dependencies: ["RelayCore"]
         ),
         .testTarget(
-            name: "NotifyRelayTests",
-            dependencies: ["NotifyRelay"]
+            name: "SendWordTests",
+            dependencies: ["SendWord"]
         ),
     ],
     swiftLanguageModes: [.v5]

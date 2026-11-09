@@ -1,6 +1,6 @@
 import ServiceManagement
 import XCTest
-@testable import NotifyRelay
+@testable import SendWord
 
 @MainActor
 final class LaunchAtLoginTests: XCTestCase {
@@ -139,9 +139,9 @@ final class LaunchAtLoginTests: XCTestCase {
 
     func testUnavailableModesNeverAccessOrModifySystemService() async {
         for (bundlePath, environment) in [
-            ("/tmp/NotifyRelay", [String: String]()),
-            ("/Applications/notify-relay.app", ["NOTIFY_RELAY_SNAPSHOT": "/tmp/screenshots"]),
-            ("/Applications/notify-relay.app", ["NOTIFY_RELAY_SNAPSHOT": ""]),
+            ("/tmp/SendWord", [String: String]()),
+            ("/Applications/SendWord.app", ["SEND_WORD_SNAPSHOT": "/tmp/screenshots"]),
+            ("/Applications/SendWord.app", ["SEND_WORD_SNAPSHOT": ""]),
         ] {
             let service = StubLoginService(status: .enabled)
             let model = makeModel(service, bundlePath: bundlePath, environment: environment)
@@ -160,7 +160,7 @@ final class LaunchAtLoginTests: XCTestCase {
 
     private func makeModel(
         _ service: StubLoginService,
-        bundlePath: String = "/Applications/notify-relay.app",
+        bundlePath: String = "/Applications/SendWord.app",
         environment: [String: String] = [:]
     ) -> LaunchAtLogin {
         LaunchAtLogin(service: service, bundleURL: URL(fileURLWithPath: bundlePath), environment: environment)

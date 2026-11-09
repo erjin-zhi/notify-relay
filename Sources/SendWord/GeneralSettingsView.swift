@@ -19,7 +19,7 @@ struct GeneralSettingsView: View {
                         Label("已开启登录时自动启动", systemImage: "checkmark.circle")
                             .foregroundStyle(.green)
                     case .requiresApproval:
-                        Label("还需在系统设置中允许 notify-relay 自动启动。", systemImage: "exclamationmark.circle")
+                        Label("还需在系统设置中允许捎信自动启动。", systemImage: "exclamationmark.circle")
                             .foregroundStyle(.orange)
                     case .notFound:
                         Text("系统未找到此应用的登录项。请将应用放入「应用程序」文件夹后重试。")
@@ -35,7 +35,7 @@ struct GeneralSettingsView: View {
                         launchAtLogin.openSystemSettings()
                     }
                 } else {
-                    Text("请使用安装后的 notify-relay.app 设置自动启动。")
+                    Text("请使用安装后的 SendWord.app 设置自动启动。")
                         .foregroundStyle(.secondary)
                 }
             } header: {

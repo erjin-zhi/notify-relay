@@ -105,8 +105,8 @@ public enum WebhookSender {
     /// “测试”按钮和模板预览用的示例通知。
     public static func sampleRecord() -> NotificationRecord {
         NotificationRecord(
-            recID: 0, bundleID: "com.oie0um.notify-relay", appName: "notify-relay",
-            title: "测试通知", subtitle: "副标题示例", body: "这是一条来自 notify-relay 的测试消息", date: Date(),
+            recID: 0, bundleID: "com.oie0um.notify-relay", appName: "捎信",
+            title: "测试通知", subtitle: "副标题示例", body: "这是一条来自捎信的测试消息", date: Date(),
             notificationID: UUID().uuidString, threadID: "thread-demo", category: "DEMO",
             interruptionLevel: .active, sound: "default", badge: 1, sender: "张三"
         )

@@ -94,7 +94,7 @@ final class RelayCoreTests: XCTestCase {
         let obj = try XCTUnwrap(JSONSerialization.jsonObject(with: msg.body) as? [String: Any])
         XCTAssertEqual(obj["msgtype"] as? String, "text")
         let content = (obj["text"] as? [String: Any])?["content"] as? String
-        XCTAssertEqual(content, "【notify-relay】测试通知\n这是一条来自 notify-relay 的测试消息")
+        XCTAssertEqual(content, "【捎信】测试通知\n这是一条来自捎信的测试消息")
     }
 
     func testPlaceholderVariants() throws {
@@ -134,7 +134,7 @@ final class RelayCoreTests: XCTestCase {
         let msg = try TemplateRenderer.render(BuiltinTemplates.wecomMarkdown.body, with: r)
         let obj = try XCTUnwrap(JSONSerialization.jsonObject(with: msg.body) as? [String: Any])
         let content = try XCTUnwrap((obj["markdown"] as? [String: Any])?["content"] as? String)
-        XCTAssertTrue(content.hasPrefix("### 测试通知\n> A\n> B\n<font color=\"comment\">notify-relay · "), content)
+        XCTAssertTrue(content.hasPrefix("### 测试通知\n> A\n> B\n<font color=\"comment\">捎信 · "), content)
     }
 
     func testPlatformErrorDetection() {
@@ -251,7 +251,7 @@ final class DeliveryCaptureTests: XCTestCase {
         XCTAssertEqual(result.request?.url, "https://example.com/hook?key=abc")
         XCTAssertEqual(result.request?.method, "POST")
         XCTAssertTrue(result.request?.contentType.hasPrefix("application/json") ?? false)
-        XCTAssertTrue(result.request?.body.contains("这是一条来自 notify-relay 的测试消息") ?? false)
+        XCTAssertTrue(result.request?.body.contains("这是一条来自捎信的测试消息") ?? false)
         XCTAssertEqual(result.responseBody, #"{"errcode":0,"errmsg":"ok"}"#)
         XCTAssertNotNil(result.duration)
     }

@@ -1,14 +1,16 @@
 <p align="center">
-  <img src="Resources/AppIcon-source.png" width="112" alt="notify-relay 图标">
+  <img src="Resources/AppIcon-source.png" width="112" alt="捎信 SendWord 图标">
 </p>
 
-<h1 align="center">notify-relay</h1>
+<h1 align="center">捎信 SendWord</h1>
 
-<p align="center">AI 在电脑上干活，进展通知随时随地在手机上看。</p>
+<p align="center">把电脑上的提醒，捎到你身边。</p>
 
-让 Codex、Claude Code 等 AI Agent 工具在 Mac 上继续工作，你可以离开电脑。notify-relay 把它们发出的系统通知转发到企业微信、飞书、钉钉或你的自建服务，让你在手机上及时看到任务完成、等待确认等提醒，知道什么时候需要回来处理。
+**捎信（SendWord）是一款 macOS 通知转发工具。** 让 Codex、Claude Code 等 AI Agent 工具在 Mac 上继续工作，你可以离开电脑。捎信把它们发出的系统通知通过 Webhook 转发到企业微信、飞书、钉钉或你的自建服务，让你在手机上及时看到任务完成、等待确认等提醒，知道什么时候需要回来处理。
 
-[下载最新版](https://github.com/erjin-zhi/notify-relay/releases/latest) · [安装](#安装) · [开始使用](#开始使用) · [界面预览](#界面预览) · [常见问题](#常见问题)
+SendWord is a macOS notification forwarding app that sends notifications from Codex, Claude Code, and other apps to WeCom, Feishu, DingTalk, or custom webhooks.
+
+[下载最新版](https://github.com/erjin-zhi/send-word/releases/latest) · [安装](#安装) · [开始使用](#开始使用) · [界面预览](#界面预览) · [常见问题](#常见问题)
 
 ## 能帮你做什么
 
@@ -26,11 +28,13 @@
 
 **系统要求：macOS 15 或更新版本，Apple 芯片 Mac（M 系列）。**
 
-1. 前往 [下载页面](https://github.com/erjin-zhi/notify-relay/releases/latest)，在 **Assets** 中下载 `notify-relay-版本号.zip`。
-2. 解压后，将 `notify-relay.app` 拖入「应用程序」文件夹。
+1. 前往 [下载页面](https://github.com/erjin-zhi/send-word/releases/latest)，在 **Assets** 中下载 `send-word-版本号.zip`。
+2. 解压后，将 `SendWord.app` 拖入「应用程序」文件夹。
 3. 打开应用，首次启动会显示设置窗口；之后点击菜单栏的铃铛图标即可进入设置。
 
-当前版本尚未经过 Apple 公证。如果首次打开时提示无法验证开发者，请确认安装包来自上面的项目发布页，再前往「系统设置 → 隐私与安全性」，找到 notify-relay 并点击「仍要打开」。详见 [Apple 的首次打开说明](https://support.apple.com/zh-cn/102445)。
+改名前发布的版本仍使用 `notify-relay-版本号.zip` 和 `notify-relay.app`，安装方式相同。
+
+当前版本尚未经过 Apple 公证。如果首次打开时提示无法验证开发者，请确认安装包来自上面的项目发布页，再前往「系统设置 → 隐私与安全性」，找到捎信并点击「仍要打开」。详见 [Apple 的首次打开说明](https://support.apple.com/zh-cn/102445)。
 
 ## 开始使用
 
@@ -38,7 +42,7 @@
 
 打开「权限」，点击「授权读取通知…」。弹出的窗口已定位到通知文件夹，直接点击「授权」，看到「已连接，正在读取新通知」即可。
 
-如果仍无法读取，按页面引导打开系统设置，为 notify-relay 开启「完全磁盘访问权限」，然后重新检测或重启应用。
+如果仍无法读取，按页面引导打开系统设置，为捎信开启「完全磁盘访问权限」，然后重新检测或重启应用。
 
 ### 2. 设置手机接收消息的地方
 
@@ -54,7 +58,7 @@
 
 确认总开关、App 规则和接收目标都已开启，再让 AI 工具产生一条**新的系统通知**，查看手机是否收到。
 
-notify-relay 转发的是工具已经发出的 macOS 系统通知，因此需要开启来源工具的通知。使用终端里的 AI 工具时，请以「最近通知」中显示的实际来源为准来添加规则。
+捎信转发的是工具已经发出的 macOS 系统通知，因此需要开启来源工具的通知。使用终端里的 AI 工具时，请以「最近通知」中显示的实际来源为准来添加规则。
 
 ## 日常使用
 
@@ -94,11 +98,11 @@ notify-relay 转发的是工具已经发出的 macOS 系统通知，因此需要
 
 ### 测试成功了，为什么 AI 工具的通知没转发？
 
-测试消息只验证接收端。请确认「权限」页已连接，再看「最近通知」是否出现了工具的新通知，以及该通知的来源是否配置了正确目标、相关开关是否开启。来源工具没有发出系统通知时，notify-relay 也不会收到任务进展。
+测试消息只验证接收端。请确认「权限」页已连接，再看「最近通知」是否出现了工具的新通知，以及该通知的来源是否配置了正确目标、相关开关是否开启。来源工具没有发出系统通知时，捎信也不会收到任务进展。
 
 ### 电脑合盖、睡眠或退出应用后，还能收到吗？
 
-Mac 需要保持唤醒、联网，notify-relay 需要保持运行。电脑睡眠或应用退出后无法继续转发；开启「通用 → 登录 Mac 时自动启动」后，下次登录会自动运行。手动退出应用后，需要重新打开才能恢复转发。
+Mac 需要保持唤醒、联网，捎信需要保持运行。电脑睡眠或应用退出后无法继续转发；开启「通用 → 登录 Mac 时自动启动」后，下次登录会自动运行。手动退出应用后，需要重新打开才能恢复转发。
 
 ### 旧通知、暂停期间的通知会补发吗？
 
@@ -106,7 +110,7 @@ Mac 需要保持唤醒、联网，notify-relay 需要保持运行。电脑睡眠
 
 ### 能在手机上直接回复或确认 AI 的操作吗？
 
-notify-relay 负责把提醒送到手机，不提供远程对话或审批功能。收到需要处理的通知后，请回到相应任务中操作。
+捎信负责把提醒送到手机，不提供远程对话或审批功能。收到需要处理的通知后，请回到相应任务中操作。
 
 ### 授权后仍然读不到通知怎么办？
 
@@ -116,6 +120,6 @@ notify-relay 负责把提醒送到手机，不提供远程对话或审批功能�
 
 通知在本机读取，消息直接发送到你配置的接收端，不经过项目方的中转服务。请只选择需要转发的 App，并使用可信的接收地址；Webhook 地址可能包含密钥，配置在本机明文保存，分享截图或反馈问题时请遮住地址和私人通知内容。
 
-遇到问题或有建议，欢迎 [提交 Issue](https://github.com/erjin-zhi/notify-relay/issues)。请附上 macOS 版本、应用版本、遇到的现象和页面提示。
+遇到问题或有建议，欢迎 [提交 Issue](https://github.com/erjin-zhi/send-word/issues)。请附上 macOS 版本、应用版本、遇到的现象和页面提示。
 
 需要更多设置细节时，可查看 [转发规则与模板参考](docs/advanced-usage.md)；源码构建、调试与发布说明见 [开发文档](docs/development.md)。

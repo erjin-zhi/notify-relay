@@ -107,11 +107,11 @@ public struct RelayConfig: Codable, Hashable, Sendable {
     }
 }
 
-/// 配置保存在 `~/Library/Application Support/notify-relay/config.json`；
-/// 设置环境变量 `NOTIFY_RELAY_CONFIG` 可改用其他文件（测试用）。
+/// 为兼容已发布版本，继续使用历史目录名；配置保存在 `~/Library/Application Support/notify-relay/config.json`；
+/// 设置环境变量 `SEND_WORD_CONFIG` 可改用其他文件（测试用）。
 public enum ConfigStore {
     public static var fileURL: URL {
-        if let p = ProcessInfo.processInfo.environment["NOTIFY_RELAY_CONFIG"], !p.isEmpty {
+        if let p = ProcessInfo.processInfo.environment["SEND_WORD_CONFIG"], !p.isEmpty {
             return URL(fileURLWithPath: p)
         }
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]

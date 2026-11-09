@@ -46,7 +46,7 @@ final class AppUpdater: NSObject, ObservableObject {
 
     private override init() {
         let env = ProcessInfo.processInfo.environment
-        isAvailable = Bundle.main.bundleURL.pathExtension == "app" && env["NOTIFY_RELAY_SNAPSHOT"] == nil
+        isAvailable = Bundle.main.bundleURL.pathExtension == "app" && env["SEND_WORD_SNAPSHOT"] == nil
         super.init()
         guard isAvailable else { return }
 
@@ -69,9 +69,9 @@ final class AppUpdater: NSObject, ObservableObject {
 }
 
 extension AppUpdater: SPUUpdaterDelegate {
-    /// 调试用：用 NOTIFY_RELAY_FEED_URL 换成本地的 appcast，测试完整的更新流程。
+    /// 调试用：用 SEND_WORD_FEED_URL 换成本地的 appcast，测试完整的更新流程。
     func feedURLString(for updater: SPUUpdater) -> String? {
-        ProcessInfo.processInfo.environment["NOTIFY_RELAY_FEED_URL"]
+        ProcessInfo.processInfo.environment["SEND_WORD_FEED_URL"]
     }
 }
 
@@ -141,7 +141,7 @@ struct UpdatesView: View {
 
             if !updater.isAvailable {
                 Section {
-                    Text("直接运行可执行文件时不检查更新。请使用打包好的 notify-relay.app。")
+                    Text("直接运行可执行文件时不检查更新。请使用打包好的 SendWord.app。")
                         .foregroundStyle(.secondary)
                 }
             }

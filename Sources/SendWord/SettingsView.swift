@@ -56,7 +56,7 @@ struct SettingsView: View {
             .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 260)
         } detail: {
             Group {
-                if ProcessInfo.processInfo.environment["NOTIFY_RELAY_PERF_BLANK"] == "1" {
+                if ProcessInfo.processInfo.environment["SEND_WORD_PERF_BLANK"] == "1" {
                     // 测量用：右侧放空白，得到侧边栏切换本身的开销。
                     Color.clear
                 } else {

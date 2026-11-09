@@ -13,6 +13,7 @@
 	<true/>
 	<key>com.apple.security.files.bookmarks.app-scope</key>
 	<true/>
+	<!-- 保留历史 Bundle ID 对应的服务名称，以兼容已发布应用。 -->
 	<!-- Sparkle 更新：沙盒 App 通过这两个服务启动安装器替换自身。名称是 Bundle ID 加 -spks / -spki。 -->
 	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
 	<array>

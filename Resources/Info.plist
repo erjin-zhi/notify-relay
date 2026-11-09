@@ -5,15 +5,16 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>zh_CN</string>
 	<key>CFBundleDisplayName</key>
-	<string>notify-relay</string>
+	<string>捎信</string>
 	<key>CFBundleExecutable</key>
-	<string>NotifyRelay</string>
+	<string>SendWord</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
+	<!-- 保留已发布应用的标识，沿用沙盒配置、授权和自动更新身份。 -->
 	<key>CFBundleIdentifier</key>
 	<string>com.oie0um.notify-relay</string>
 	<key>CFBundleName</key>
-	<string>notify-relay</string>
+	<string>SendWord</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -31,7 +32,7 @@
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://github.com/erjin-zhi/notify-relay/releases/latest/download/appcast.xml</string>
+	<string>https://github.com/erjin-zhi/send-word/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>I8sls6cpo/LK2VAZkJ7lNtcpEqtO2DtAvuN2D2tU1I8=</string>
 	<key>SUScheduledCheckInterval</key>

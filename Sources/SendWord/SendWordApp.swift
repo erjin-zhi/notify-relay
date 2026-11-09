@@ -18,7 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension Notification.Name {
-    static let showSettings = Notification.Name("notify-relay.showSettings")
+    static let showSettings = Notification.Name("send-word.showSettings")
 }
 
 /// 菜单栏图标。它一直存在，所以由它负责响应“打开设置”。
@@ -36,7 +36,7 @@ struct MenuBarLabel: View {
 }
 
 @main
-struct NotifyRelayApp: App {
+struct SendWordApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @StateObject private var engine: RelayEngine
     /// 第一次使用（还没有配置文件）或读不到通知时，启动后直接打开设置窗口。
@@ -60,7 +60,7 @@ struct NotifyRelayApp: App {
         }
         .menuBarExtraStyle(.menu)
 
-        Window("notify-relay 设置", id: "settings") {
+        Window("捎信设置", id: "settings") {
             SettingsView()
                 .environmentObject(engine)
                 .frame(minWidth: 720, minHeight: 480)
@@ -109,7 +109,7 @@ struct MenuContent: View {
 
         Divider()
 
-        Button("退出 notify-relay") { NSApp.terminate(nil) }
+        Button("退出捎信") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
     }
 

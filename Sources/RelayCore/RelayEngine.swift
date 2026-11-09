@@ -62,7 +62,7 @@ public final class RelayEngine: ObservableObject {
         Self.appendToLogFile(line)
     }
 
-    /// 诊断记录同时写到 `~/Library/Logs/notify-relay/diagnostics.log`（沙盒里在 App 容器内）。
+    /// 沿用历史日志目录，诊断记录同时写到 `~/Library/Logs/notify-relay/diagnostics.log`（沙盒里在 App 容器内）。
     public static var logFileURL: URL {
         FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Logs/notify-relay/diagnostics.log")
@@ -120,10 +120,10 @@ public final class RelayEngine: ObservableObject {
         poll()
     }
 
-    private static let debug = ProcessInfo.processInfo.environment["NOTIFY_RELAY_DEBUG"] == "1"
+    private static let debug = ProcessInfo.processInfo.environment["SEND_WORD_DEBUG"] == "1"
     fileprivate func debugLog(_ message: @autoclosure () -> String) {
         guard Self.debug else { return }
-        FileHandle.standardError.write(Data("[notify-relay] \(message())\n".utf8))
+        FileHandle.standardError.write(Data("[SendWord] \(message())\n".utf8))
     }
 
     func poll() {

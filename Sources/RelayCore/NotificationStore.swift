@@ -47,9 +47,9 @@ public struct RawRecord: Sendable {
 
 /// 只读访问 macOS 系统通知数据库。
 public final class NotificationStore {
-    /// 默认路径；设置环境变量 `NOTIFY_RELAY_DB` 可改用其他数据库（测试用）。
+    /// 默认路径；设置环境变量 `SEND_WORD_DB` 可改用其他数据库（测试用）。
     public static var defaultPath: String {
-        if let p = ProcessInfo.processInfo.environment["NOTIFY_RELAY_DB"], !p.isEmpty { return p }
+        if let p = ProcessInfo.processInfo.environment["SEND_WORD_DB"], !p.isEmpty { return p }
         return RealHome.url.appendingPathComponent("Library/Group Containers/group.com.apple.usernoted/db2/db").path
     }
 

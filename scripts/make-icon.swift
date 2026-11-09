@@ -22,7 +22,7 @@ guard let source = CGImageSourceCreateWithURL(sourceURL as CFURL, nil),
 }
 
 let temporaryURL = FileManager.default.temporaryDirectory
-    .appendingPathComponent("notify-relay-icon-\(UUID().uuidString)")
+    .appendingPathComponent("send-word-icon-\(UUID().uuidString)")
 let iconsetURL = temporaryURL.appendingPathComponent("AppIcon.iconset")
 try FileManager.default.createDirectory(at: iconsetURL, withIntermediateDirectories: true)
 defer { try? FileManager.default.removeItem(at: temporaryURL) }

@@ -43,7 +43,7 @@ struct AccessView: View {
                         icon: "folder.badge.gearshape",
                         title: "只允许读取通知文件夹",
                         badge: "推荐",
-                        text: "弹出的窗口已经定位好，直接点「授权」。notify-relay 只能看到存放通知的这一个文件夹。"
+                        text: "弹出的窗口已经定位好，直接点「授权」。捎信只能看到存放通知的这一个文件夹。"
                     ) {
                         Button("授权读取通知…") { pickFolder() }
                             .prominentGlassButton()
@@ -54,7 +54,7 @@ struct AccessView: View {
                         icon: "lock.shield",
                         title: "打开完全磁盘访问权限",
                         badge: nil,
-                        text: "上面的方式不起作用时再用。把屏幕上出现的 notify-relay 图标拖进系统设置的列表，再打开开关。"
+                        text: "上面的方式不起作用时再用。把屏幕上出现的捎信图标拖进系统设置的列表，再打开开关。"
                     ) {
                         Button("打开系统设置") { AccessGuide.shared.start(engine: engine) }
                     }
@@ -106,7 +106,7 @@ struct AccessView: View {
                 engine.retryAccess()
             }
         } message: {
-            Text("撤销后 notify-relay 读不到通知，转发会停止，需要重新授权。")
+            Text("撤销后捎信读不到通知，转发会停止，需要重新授权。")
         }
     }
 
@@ -124,11 +124,11 @@ struct AccessView: View {
                     .offset(x: 3, y: 3)
             }
             VStack(alignment: .leading, spacing: 4) {
-                Text(granted ? "已经可以读取通知" : "允许 notify-relay 读取通知")
+                Text(granted ? "已经可以读取通知" : "允许捎信读取通知")
                     .font(.title3.weight(.semibold))
                 Text(granted
                      ? (engine.config.forwardingEnabled
-                        ? "notify-relay 在后台留意新通知，并按你设置的规则转发。"
+                        ? "捎信在后台留意新通知，并按你设置的规则转发。"
                         : "转发已暂停。新通知仍会出现在「最近通知」里，但不会发送。")
                      : "macOS 不让 App 互相查看通知，需要你允许一次。下面两种方式选一种就行。")
                     .foregroundStyle(.secondary)
@@ -221,7 +221,7 @@ final class FolderPanelDelegate: NSObject, NSOpenSavePanelDelegate {
 
     func panel(_ sender: Any, validate url: URL) throws {
         guard FolderGrant.isAcceptable(url) else {
-            throw NSError(domain: "notify-relay", code: 1, userInfo: [
+            throw NSError(domain: "SendWord", code: 1, userInfo: [
                 NSLocalizedDescriptionKey: "这不是存放通知的文件夹",
                 NSLocalizedRecoverySuggestionErrorKey: "请回到「db2」文件夹里，什么都不用选，直接点「授权」。",
             ])
@@ -240,7 +240,7 @@ enum FolderPanelAccessory {
                     .foregroundStyle(Color.accentColor)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("已经帮你定位好了，直接点右下角的「授权」").font(.headline)
-                    Text("不用选文件，也不用换文件夹。notify-relay 只会读取这里的通知记录。")
+                    Text("不用选文件，也不用换文件夹。捎信只会读取这里的通知记录。")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -414,7 +414,7 @@ private struct GuideView: View {
                     .foregroundStyle(.green)
                 VStack(alignment: .leading, spacing: 4) {
                     Text("授权成功").font(.headline)
-                    Text("notify-relay 已经可以读取通知了。").foregroundStyle(.secondary)
+                    Text("捎信已经可以读取通知了。").foregroundStyle(.secondary)
                 }
             } else {
                 DraggableAppIcon()
@@ -422,9 +422,9 @@ private struct GuideView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Label("把图标拖进上方的 App 列表", systemImage: "arrow.up")
                         .font(.headline)
-                    Text("然后打开 notify-relay 的开关。")
+                    Text("然后打开捎信的开关。")
                         .foregroundStyle(.secondary)
-                    Button("已打开开关但没生效？重新启动 notify-relay", action: relaunch)
+                    Button("已打开开关但没生效？重新启动捎信", action: relaunch)
                         .buttonStyle(.link)
                         .font(.caption)
                 }
@@ -446,7 +446,7 @@ private struct GuideView: View {
     }
 }
 
-/// 可以拖出去的 App 图标，拖动内容是 notify-relay.app 本身的文件地址。
+/// 可以拖出去的 App 图标，拖动内容是 SendWord.app 本身的文件地址。
 private struct DraggableAppIcon: NSViewRepresentable {
     func makeNSView(context: Context) -> DragSourceView { DragSourceView() }
     func updateNSView(_ nsView: DragSourceView, context: Context) {}
