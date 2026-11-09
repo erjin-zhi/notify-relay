@@ -67,7 +67,7 @@ $(cat "$NOTES_FILE")
 </rss>
 XML
 
-echo "已生成 $ZIP 和 $OUT/appcast.xml（版本 $VERSION，构建号 $BUILD）"
+echo "已生成 ${ZIP} 和 ${OUT}/appcast.xml（版本 ${VERSION}，构建号 ${BUILD}）"
 
 if [ "$PUBLISH" = "--publish" ]; then
     gh release create "$TAG" "$ZIP" "$OUT/appcast.xml" \
